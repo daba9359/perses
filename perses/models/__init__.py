@@ -52,5 +52,7 @@ from perses.models.ConvolvedForegroundModel import ConvolvedForegroundModel
 from perses.models.Full21cmModel import Full21cmModel
 from perses.models.CryoChromConModel import CryoChromConModel
 from perses.models.CryofunkBeamModelAboveHorizon import CryofunkBeamModelAboveHorizon
+from perses.models.LambdaCDMModel import LambdaCDMModel # added by David W. Barker February 23rd 2026
+from perses.models.DarkMatterDecayModel import DarkMatterDecayModel
 #from perses.models.GlobalemuSignalModel import GlobalemuSignalModel
 
