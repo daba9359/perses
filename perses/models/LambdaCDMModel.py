@@ -87,19 +87,19 @@ class LambdaCDMModel(LoadableModel):
         """
         Evaluates this LambdaCDMModel at the given parameter values.
         
-        parameters: array of length 5, containing the density parameter for radiation,
-                    matter, curvature, dark energy, and baryons.
+        parameters: array of length 6, containing the density parameter for radiation,
+                    matter, curvature, dark energy, baryons, and the hubble constant.
 
         returns: fiducial Lambda CDM model evaluated at the given parameters
         """
-        if len(parameters) != 3:
-            raise ValueError("There should be 3 parameters given to the LambdaCDMModel: the density parameter for matter: omM0,\
-                            , dark energy: omL0, and baryons: omB0" )
+        if len(parameters) != 2:
+            raise ValueError("There should be 2 parameters given to the LambdaCDMModel: the density parameter for matter: omM0h2,\
+                            , and baryons: omB0h2" )
         try:
-            model_parameters = [[8.600000001024455e-05 ,0],[parameters[0],0],[0,0],[parameters[1],0],[parameters[2],0]]
+            model_parameters = [[8.600000001024455e-05 ,0],[parameters[0],0],[0,0],[1-parameters[0],0],[parameters[1],0],[67.49,0]]
             
-            raw_values = np.array(py21cmsig.lambdaCDM_training_set(np.arange(1,51),model_parameters,N=1,verbose=False)[0][0])
-            interpolator = scipy.interpolate.CubicSpline(np.arange(1,51),raw_values)
+            raw_values = np.array(py21cmsig.lambdaCDM_training_set(np.arange(1,50,0.5),model_parameters,N=1,verbose=False)[0][0])
+            interpolator = scipy.interpolate.CubicSpline(np.arange(1,50,0.5),raw_values)
             signal_in_mK = interpolator(self.frequencies)
         except ValueError:
             print("The Lambda CDM Model evaluated an infinite number based on a parameter input. This value will be ignored") 
@@ -116,7 +116,7 @@ class LambdaCDMModel(LoadableModel):
         necessitated by this model.
         """
         if not hasattr(self, '_parameters'):
-            self._parameters = ["omM0","omL0","omB0"]
+            self._parameters = ["omM0h2","omB0h2"]
         return self._parameters
     
     @property
