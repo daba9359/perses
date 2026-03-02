@@ -91,11 +91,11 @@ class DarkMatterDecayModel(LoadableModel):
 
         returns: fiducial Lambda CDM model evaluated at the given parameters
         """
-        parameter = np.array([parameters])
-        if len(parameter) != 1:
+        parameter = np.array([parameters[0],parameters[1]])
+        if len(parameter) != 2:
             raise ValueError("There should be 1 parameter given to the DarkMatterDecayModel: the f_DMD parameter which \
                              represents the efficiency multiplied by the decay half life in seconds" )
-        model_parameters = [parameter]
+        model_parameters = [parameter[0],parameters[1]]
         
         raw_values = np.array(py21cmsig.DMD_training_set(np.arange(5,51),model_parameters,N=1,verbose=False)[0][0])
         interpolator = scipy.interpolate.CubicSpline(np.arange(5,51),raw_values)
@@ -113,7 +113,7 @@ class DarkMatterDecayModel(LoadableModel):
         necessitated by this model.
         """
         if not hasattr(self, '_parameters'):
-            self._parameters = ["f_DMD"]
+            self._parameters = ["f_DMD","derp"]
         return self._parameters
     
     @property
@@ -158,7 +158,7 @@ class DarkMatterDecayModel(LoadableModel):
         """
         frequencies = get_hdf5_value(group['frequencies'])
         in_Kelvin = group.attrs['in_Kelvin']
-        return LambdaCDMModel(frequencies, in_Kelvin=in_Kelvin)
+        return DarkMatterDecayModel(frequencies, in_Kelvin=in_Kelvin)
 
     def __eq__(self, other):
         """
@@ -168,7 +168,7 @@ class DarkMatterDecayModel(LoadableModel):
         
         returns: True if other is equal to this model, False otherwise
         """
-        if not isinstance(other, LambdaCDMModel):
+        if not isinstance(other, DarkMatterDecayModel):
             return False
         if self.in_Kelvin != other.in_Kelvin:
             return False
