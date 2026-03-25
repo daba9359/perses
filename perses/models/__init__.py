@@ -55,5 +55,10 @@ from perses.models.CryofunkBeamModelAboveHorizon import CryofunkBeamModelAboveHo
 from perses.models.LambdaCDMModel import LambdaCDMModel # added by David W. Barker February 23rd 2026
 from perses.models.DarkMatterDecayModel import DarkMatterDecayModel
 from perses.models.EarlyDarkEnergyModel import EarlyDarkEnergyModel
+from perses.models.DarkMatterAnnihilationModel import DarkMatterAnnihilationModel
+from perses.models.DarkMatterBaryonInteractionModel import DarkMatterBaryonInteractionModel
+from perses.models.ExcessRadioBackgroundModel import ExcessRadioBackgroundModel
+from perses.models.PrimordialBlackHolesModel import PrimordialBlackHolesModel
+from perses.models.PrimordialMagneticFieldsModel import PrimordialMagneticFieldsModel
 #from perses.models.GlobalemuSignalModel import GlobalemuSignalModel
 

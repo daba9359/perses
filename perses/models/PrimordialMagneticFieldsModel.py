@@ -1,13 +1,15 @@
-### First we need to feed it an exotic model in the correct format:
 # have to make my fiducial model function a "LoadableModel" for pylinex
+# This is the simplified version that does not vary omR0 or omK0 (which rarely vary anyways)
 """
-File: perses/models/DarkMatterDecayModel.py
+File: perses/models/PrimordialMagneticFieldsModel.py
 Author: David W. Barker
-Date: 16 Feb 2026
+Date: 24 Mar 2026
 
 Description: File containing class extending pylinex's Model class to model
-             global 21-cm signals using the fiducial Lambda CDM model, but
+             global 21-cm signals using the primordial magnetic fields formulation, but only
              for the cosmic Dark Ages at this time.
+
+             NOTE: Need to fix the import for py21cmsig
 """
 import numpy as np
 import sys
@@ -19,14 +21,14 @@ from pylinex import LoadableModel
 from pylinex.util import sequence_types, bool_types, create_hdf5_dataset,\
     get_hdf5_value
 
-class DarkMatterDecayModel(LoadableModel):
+class PrimordialMagneticFieldsModel(LoadableModel):
     """Class extending pylinex's Model class to model global 21-cm signals using
-    the the math behind adiabatic expansion, compton scattering, and stimulated emission, 
+    the the math behind adiabatic expansion, compton scattering, stimulated emission, and heating from primordial magnetic fields 
     but keep in mind that this does not work beyond the Dark Ages as of now."""
     
     def __init__(self, frequencies, in_Kelvin=False):
         """
-        Initializes a new LambdaCDMModel applying to the given frequencies.
+        Initializes a new PrimordialMagneticFieldsModel applying to the given frequencies.
         
         frequencies: 1D (monotonically increasing) array of values in MHz
         in_Kelvin: if True, units are K; if False (default), units are mK
@@ -57,8 +59,6 @@ class DarkMatterDecayModel(LoadableModel):
             raise TypeError("frequencies was set to a non-sequence.")
         if value.max() > 50:
             raise ValueError("This model only works within the cosmic Dark Ages (less than 50 MHz)")
-        if value.min() < 5:
-            raise ValueError("Currently, this model becomes inaccurate below 5 MHz and begins yielding infinite values.")
         
     @property
     def in_Kelvin(self):
@@ -85,22 +85,24 @@ class DarkMatterDecayModel(LoadableModel):
         
     def __call__(self, parameters):
         """
-        Evaluates this LambdaCDMModel at the given parameter values.
+        Evaluates this PrimordialMagneticFieldsModel at the given parameter values.
         
-        parameters: float representing the f_DMD value. Theory allows it to range from 0.5e26 - 500e26 (represents the efficiency multiplied by the decay half life in seconds)
+        parameters: array of length 2, with the first value being the spectral index of the distribution of primordial magnetic fields: n_b
+                    ,and the second being the root mean square of the amplitude of these magnetic fields in nG: B_0 
 
-        returns: dark matter decay model evaluated at the given parameters
+        returns: primordial magnetic fields model evaluated at the given parameters
         """
-        parameter = np.array([parameters[0],parameters[1]])
-        if len(parameter) != 2:
-            raise ValueError("There should be 2 parameters given to the DarkMatterDecayModel: the f_DMD parameter which \
-                             represents the efficiency multiplied by the decay half life in seconds and a dummy variable that\
-                             can be whatever your want. " )
-        model_parameters = [parameter[0],parameters[1]]
-        
-        raw_values = np.array(py21cmsig.DMD_training_set(np.arange(5,51),model_parameters,N=1,verbose=False)[0][0])
-        interpolator = scipy.interpolate.CubicSpline(np.arange(5,51),raw_values)
-        signal_in_mK = interpolator(self.frequencies)
+        if len(parameters) != 2:
+            raise ValueError("There should be 2 parameters given to the PrimordialMagneticFieldsModel: the spectral index of the distribution of primordial magnetic fields: n_b,\
+the root mean square of the amplitude of these magnetic fields in nG: B_0 " )
+        try:
+            model_parameters = [[parameters[0],parameters[1]]]
+            
+            raw_values = np.array(py21cmsig.PMF_training_set(np.arange(1,50,0.5),model_parameters,N=1,verbose=False)[0][0])
+            interpolator = scipy.interpolate.CubicSpline(np.arange(1,50,0.5),raw_values)
+            signal_in_mK = interpolator(self.frequencies)
+        except ValueError:
+            print("The model evaluated an infinite number based on a parameter input. This value will be ignored") 
         
         if self.in_Kelvin:
             return signal_in_mK
@@ -114,7 +116,7 @@ class DarkMatterDecayModel(LoadableModel):
         necessitated by this model.
         """
         if not hasattr(self, '_parameters'):
-            self._parameters = ["f_DMD","dummy"]
+            self._parameters = ["n_b","B_0"]
         return self._parameters
     
     @property
@@ -141,9 +143,9 @@ class DarkMatterDecayModel(LoadableModel):
         
         group: hdf5 file group to fill with information about this model
         """
-        group.attrs['class'] = 'LambdaCDMModel'
+        group.attrs['class'] = 'PrimordialMagneticFieldsModel'
         group.attrs['import_string'] =\
-            'from perses.models import LambdaCDMModel'
+            'from perses.models import PrimordialMagneticFieldsModel'
         group.attrs['in_Kelvin'] = self.in_Kelvin
         create_hdf5_dataset(group, 'frequencies', data=self.frequencies)
 
@@ -159,7 +161,7 @@ class DarkMatterDecayModel(LoadableModel):
         """
         frequencies = get_hdf5_value(group['frequencies'])
         in_Kelvin = group.attrs['in_Kelvin']
-        return DarkMatterDecayModel(frequencies, in_Kelvin=in_Kelvin)
+        return PrimordialMagneticFieldsModel(frequencies, in_Kelvin=in_Kelvin)
 
     def __eq__(self, other):
         """
@@ -169,7 +171,7 @@ class DarkMatterDecayModel(LoadableModel):
         
         returns: True if other is equal to this model, False otherwise
         """
-        if not isinstance(other, DarkMatterDecayModel):
+        if not isinstance(other, PrimordialMagneticFieldsModel):
             return False
         if self.in_Kelvin != other.in_Kelvin:
             return False
