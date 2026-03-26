@@ -101,8 +101,8 @@ class DarkMatterAnnihilationModel(LoadableModel):
         try:
             model_parameters = [[parameters[0],parameters[1]]]
             
-            raw_values = np.array(py21cmsig.DMAN_training_set(np.arange(1,50,0.5),model_parameters,N=1,verbose=False)[0][0])
-            interpolator = scipy.interpolate.CubicSpline(np.arange(1,50,0.5),raw_values)
+            raw_values = np.array(py21cmsig.DMAN_training_set(np.arange(2,50,0.5),model_parameters,N=1,verbose=False)[0][0])
+            interpolator = scipy.interpolate.CubicSpline(np.arange(2,50,0.5),raw_values)
             signal_in_mK = interpolator(self.frequencies)
         except ValueError:
             print("The model evaluated an infinite number based on a parameter input. This value will be ignored") 
