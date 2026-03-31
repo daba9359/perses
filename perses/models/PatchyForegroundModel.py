@@ -185,7 +185,8 @@ class PatchyForegroundModel(LoadableModel):
 		for key in self.foreground_mask_by_region_dictionary.keys():
 			empty_map[self.foreground_mask_by_region_dictionary[key]] = float(key)
 			
-		hp.mollview(empty_map, title=rf'Spectral Index Patch Map $M_j$ for $N_r = {self.num_regions}$ regions')
+		hp.projview(empty_map,fontsize={"cbar_label": 20,"cbar_tick_label":20})
+		plot.title(rf'Spectral Index Patch Map $M_j$ for $N_r = {self.num_regions}$ regions',fontsize=20)
 		plot.show()
 		
 	@property
