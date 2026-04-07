@@ -96,7 +96,7 @@ class DarkMatterDecayModel(LoadableModel):
             raise ValueError("There should be 2 parameters given to the DarkMatterDecayModel: the f_DMD parameter which \
                              represents the efficiency multiplied by the decay half life in seconds and a dummy variable that\
                              can be whatever your want. " )
-        model_parameters = [parameter[0],parameters[1]]
+        model_parameters = [parameter[0]*10,parameters[1]]
         
         raw_values = np.array(py21cmsig.DMD_training_set(np.arange(5,51),model_parameters,N=1,verbose=False)[0][0])
         interpolator = scipy.interpolate.CubicSpline(np.arange(5,51),raw_values)

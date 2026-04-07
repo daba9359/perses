@@ -97,7 +97,7 @@ class DarkMatterBaryonInteractionModel(LoadableModel):
             raise ValueError("There should be 2 parameters given to the DarkMatterBaryonInteractionModel: the phenomenological constant: C,\
                             , and a dummy variable: dummy" )
         try:
-            model_parameters = [[parameters[0],parameters[1]]]
+            model_parameters = [parameters[0],parameters[1]]
             
             raw_values = np.array(py21cmsig.MCDM_training_set(np.arange(1,50,0.5),model_parameters,N=1,verbose=False)[0][0])
             interpolator = scipy.interpolate.CubicSpline(np.arange(1,50,0.5),raw_values)
