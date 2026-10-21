@@ -96,13 +96,16 @@ class LambdaCDMModel(LoadableModel):
             raise ValueError("There should be 2 parameters given to the LambdaCDMModel: the density parameter for matter: omM0h2,\
                             , and baryons: omB0h2" )
         try:
-            model_parameters = [[8.600000001024455e-05 ,0],[parameters[0],0],[0,0],[1-parameters[0],0],[parameters[1],0],[67.49,0]]
+            model_parameters = [[8.600000001024455e-05 ,0],[parameters[0],0],[0,0],[1-(parameters[0]/((67.49/100)**2)),0],[parameters[1],0],[67.49,0]]
             
             raw_values = np.array(py21cmsig.lambdaCDM_training_set(np.arange(1,50,0.5),model_parameters,N=1,verbose=False)[0][0])
             interpolator = scipy.interpolate.CubicSpline(np.arange(1,50,0.5),raw_values)
             signal_in_mK = interpolator(self.frequencies)
-        except ValueError:
-            print("The Lambda CDM Model evaluated an infinite number based on a parameter input. This value will be ignored") 
+        except ValueError as e:
+            raise ValueError(
+                f"LambdaCDMModel failed for parameters "
+                f"{parameters}: {e}"
+            ) from e 
         
         if self.in_Kelvin:
             return signal_in_mK
